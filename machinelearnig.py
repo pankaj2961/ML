@@ -106,6 +106,9 @@ df.groupby('Customer_Segment')
 master_df['Customer_Segment'].unique()  | df_by_segment['Profit'].sum()
 df_by_segment['Profit'].sort_values(ascending = False)
 pd.DataFrame(df_by_segment['Profit'].sum())                                         # converting to dataframe
+df['Order_Date'] = pd.to_datetime(df['Order_Date'])                                 #converting object type to datetime format
+time_df = df.groupby('Order_Date')['Sales'].sum()                                   #groupby 
+df['month'] = df['Order_Date'].dt.month                                             # extract month from date part
 
 by_product_cat_subcat = master_df.groupby(['Product_Category', 'Product_Sub_Category'])         # 1. Group by category and sub-category
 by_product_cat_subcat['Profit'].mean()                                                          # then aplly mean
@@ -151,6 +154,7 @@ plt.show()
     matplot = "https://matplotlib.org/users/pyplot_tutorial.html"
     matplotTutorial ="https://github.com/rougier/matplotlib-tutorial"
     seaborn = "https://seaborn.pydata.org/tutorial/categorical.html"
+    seaborn heatmap = "https://seaborn.pydata.org/generated/seaborn.heatmap.html"
 
 plt.subplot(nrows, ncols, nsubplot)
 
@@ -240,6 +244,17 @@ sns.barplot(x='Product_Category', y='Sales', data=df)                           
 sns.barplot(x='Product_Category', y='Sales', data=df, estimator=np.median)                  # subplot 2: statistic=median
 
 sns.countplot(y="Product_Sub_Category", data=df)                                    # Plotting count across a categorical variable
+
+sns.tsplot(df_time)                                                                 # time series plot
+
+year_month = pd.pivot_table(df, values='Sales', index='year', columns='month', aggfunc='mean')  #Pivoting the data using 'month'   index = rows,  mean of sales will be shown at 0,0  0,1  0,2 and so on 
+
+
+
+Doubts
+
+what is the significance of line on bar plot     "C:\Users\p7111567\ML\Session 5 - Pandas and Vizualizations\Basics of visualisation\3 Plotting Categorical and Time-Series Data\3_Plotting_Categorical_Data.ipynb
+"
 
 
 
