@@ -100,6 +100,8 @@ df_1 = pd.merge(market_df, customer_df, how='inner', on='Cust_id')            # 
 df_2 = pd.merge(df_1, product_df, how='inner', on='Prod_id')
 df_3 = pd.merge(df_2, shipping_df, how='inner', on='Ship_id')
 
+m1 = pd.merge(btc, ether, how="inner", left_on="Date_btc", right_on="Date_et")
+
 df.groupby('Customer_Segment')
 master_df['Customer_Segment'].unique()  | df_by_segment['Profit'].sum()
 df_by_segment['Profit'].sort_values(ascending = False)
@@ -148,6 +150,7 @@ plt.show()
 #************************************************
     matplot = "https://matplotlib.org/users/pyplot_tutorial.html"
     matplotTutorial ="https://github.com/rougier/matplotlib-tutorial"
+    seaborn = "https://seaborn.pydata.org/tutorial/categorical.html"
 
 plt.subplot(nrows, ncols, nsubplot)
 
@@ -187,7 +190,7 @@ plt.show()                                                                      
 
 #Boxplots   |   Histograms  |   Scatter plots   | Bar plots
 #*********************************************************************
-plt.boxplot(df['Order_Quantity'])
+plt.boxplot(df['Order_Quantity'])   | sns.boxplot(df['Order_Quantity'])
 plt.show()                                                                          # we have write .show() to see the image
 plt.yscale('log')                                                                   # log scale subplot
 
@@ -211,6 +214,32 @@ Since seaborn uses matplotlib behind the scenes, the usual matplotlib functions 
 plt.subplot(2, 2, 1)
 plt.title('Sales')
 sns.distplot(df['Sales'])
+
+sns.boxplot(y=df['Order_Quantity'])                                                 # to plot the values on the vertical axis, specify y=variable
+sns.boxplot(x='Product_Category', y='Sales', data=df)                               # boxplot of a variable across various product categories(group by category  with sales)
+
+#Bivariate                                                                              #two univariate distributions plotted on x and y axes respectively.
+sns.jointplot('Sales', 'Profit', df)
+sns.jointplot('Sales', 'Profit', df, kind="hex", color="k")
+
+btc.columns = btc.columns.map(lambda x: str(x) + '_btc')                            # putting a suffix(_btc) with column names 
+sns.pairplot(curr)                                                                  # pairplot Pairwise Scatter Plot for all variables
+
+cor = curr.corr()                                                                   # You can also observe the correlation between the currencies # using df.corr()
+round(cor, 3)
+
+plt.figure(figsize=(10,8))                                                          # figure size
+sns.heatmap(cor, cmap="YlGnBu", annot=True)                                         # heatmap helpful to visualise the correlation matrix itself using sns.heatmap()
+
+plt.figure(num=None, figsize=(12, 8), dpi=80, facecolor='w', edgecolor='k')                 # set figure size for larger figure
+sns.boxplot(x='Customer_Segment', y='Profit', hue="Product_Category", data=df)              # specify hue="categorical_variable"
+
+sns.boxplot(x=df['Product_Category'], y=100*df['Shipping_Cost']/df['Sales'])                # different format
+
+sns.barplot(x='Product_Category', y='Sales', data=df)                                       # bar plot with default statistic=mean
+sns.barplot(x='Product_Category', y='Sales', data=df, estimator=np.median)                  # subplot 2: statistic=median
+
+sns.countplot(y="Product_Sub_Category", data=df)                                    # Plotting count across a categorical variable
 
 
 
