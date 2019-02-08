@@ -83,6 +83,14 @@ df.loc(row,col)                                                                 
 df.loc[(df.Sales > 2000) & (df.Sales < 3000) & (df.Profit > 100), :]            # E.g. all orders having 2000 < Sales < 3000 and Profit > 100  ; # Also, this time, you need all the columns
 df.loc[(df.Sales > 2000) & (df.Sales < 3000) , ['Cust_id', 'Sales', 'Profit']]       # E.g. all orders having 2000 < Sales < 3000 and Profit > 100  ; # Also, this time, you only need the Cust_id, Sales and Profit columns
 
+beverage['beer_servings'] = beverage.beer_servings.astype(float)                    # to change type of column  .astype() 
+beverage = pd.read_csv(url, dtype={'beer_servings':float})                          # change data type of column while loading
+astype('category')
+
+Subsetting Data in pandas by Data Type
+****************************************************************
+beverage_Numeric = beverage.select_dtypes(include=['int64']).copy()                 # use df.select_dtypes to select the columns by data type
+
 customers_in_bangalore = ['Cust_1798', 'Cust_1519', 'Cust_637', 'Cust_851']
 df.loc[df['Cust_id'].isin(customers_in_bangalore), :]                             # syntax  df['column_name'].isin(list)
 
@@ -249,6 +257,8 @@ sns.tsplot(df_time)                                                             
 
 year_month = pd.pivot_table(df, values='Sales', index='year', columns='month', aggfunc='mean')  #Pivoting the data using 'month'   index = rows,  mean of sales will be shown at 0,0  0,1  0,2 and so on 
 
+Managing missing values
+**********************************************
 
 
 Doubts
