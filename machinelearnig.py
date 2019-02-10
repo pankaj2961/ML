@@ -6,6 +6,13 @@ import seaborn as sns                                                       # th
 
 from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
+from sklearn.neighbors import KNeighborsClassifier
+
+from sklearn.covariance import EllipticEnvelope
+from sklearn.datasets import make_blobs
+
+help(pd.DataFrame.loc)
+type(variable_name)
 
 sns.set_style("whitegrid")                                                  # set a seaborn style of your taste
 
@@ -14,9 +21,9 @@ sns.set_style("whitegrid")                                                  # se
 
 np.ones((5, 3)|[5,3], dtype = np.int)                                       #: Create array of 1s,tuple or list anything ;  dtype by default is float
 np.zeros(4, dtype = np.int)                                                 #: create 1d array
-np.random.random([3, 4])					                                #: Create array of random numbers
+np.random.random([3, 4])					                                #: Create array of 3*4 of random numbers
 np.arange(10, 100, 5)	| np.arange(24)						                #: Create array with increments of a fixed step size; # From 10 to 100 with a step of 5  ;  from 0 to 23 with step of 1
-np.linspace(1, 2, 4)							                            #: Create array of fixed length  ; # Array of length 4 between 1 and 2
+np.linspace(1, 2, 4)							                            #: Create array of fixed length  ; # Array of length 4 between 1 and 2 excluding (2)
 np.arange(24).reshape(2, 3, 4)                                              # Creating a 3-D array of (z*X*y) 2*3*4 ; # reshape() simply reshapes a 1-D array 
 np.indices((3,3))                                                           # create 3 d array
 some_array.reshape(4, -1)					                                # If you specify -1 as a dimension, the dimensions are automatically calculated : # -1 means "whatever dimension is needed" 
@@ -52,6 +59,8 @@ a_list = [x/(x+1) for x in a]                                               #  n
 f = np.vectorize(lambda x: x/(x+1))
 f(a)                                                                         #  vectorize numpy way 
 
+houses['Outlier'] = np.where(houses['Bathrooms'] < 20, 0, 1)                # Create feature based on boolean condition
+
 
 
 #Pandas
@@ -74,25 +83,37 @@ market_df.describe()                                                        # De
 market_df.columns                                                           # Column names
 market_df.shape                                                             # dimension ; # The number of rows and columns
 
+df['column'] or df.column                                                   #return a series
+df[['col_x', 'col_y']]                                                      #returns a dataframe
+
 market_df.set_index('Ord_id', inplace = True)                               # Setting index to Ord_ida
 market_df.sort_index(axis = 0, ascending = False)                           # Sorting by index  # axis = 0 indicates that you want to sort rows (use axis=1 for columns)
 market_df.sort_values(by='Sales',ascending = False).head()                  # Sorting by values # Sorting in increasing order of Sales
 market_df.sort_values(by=['Prod_id', 'Sales'], ascending = False)           # Sorting by more than two columns ; # Sorting in prod_id and then look for  sales
 
+# df.iloc and df.loc
+#********************************
+
+df.loc(row,col)                                                                            # syntax  for displaying data frame
+market_df.iloc[[3, 7, 8]]                                                       # Select multiple rows using a list of indices
+market_df.iloc[[True, True, False, True, True, False, True]]                    # Using booleans    # This selects the rows corresponding to True
+market_df.loc[4:8,]                                                            # Selecting rows using a range of labels # Notice that with df.loc, both 4 and 8 are included, unlike with df.iloc   # This is an important difference between iloc and loc
+market_df.loc['Ord_5406', ['Sales', 'Profit', 'Cust_id']]
+market_df.loc[['Ord_5406', 'Ord_5446', 'Ord_5485'], 'Sales':'Profit']               # Select multiple orders using labels, and some columns
+
+X = np.array([[1.1, 11.1], 
+              [2.2, 22.2], 
+              [3.3, 33.3], 
+              [4.4, 44.4], 
+              [np.nan, 55]])
+df = pd.DataFrame(X, columns=['Col1', 'Col2'])                                      #  load data as data frame
+
 #Subsetting dataframe Rows Based on Conditions
 #*******************************************
 
-df.loc(row,col)                                                                            # syntax  for displaying data frame
+df.loc[df['Sales'] > 3000]  | df.loc[df['Sales'] > 3000, :]                     # selecting rows based on boolean condition
 df.loc[(df.Sales > 2000) & (df.Sales < 3000) & (df.Profit > 100), :]            # E.g. all orders having 2000 < Sales < 3000 and Profit > 100  ; # Also, this time, you need all the columns
 df.loc[(df.Sales > 2000) & (df.Sales < 3000) , ['Cust_id', 'Sales', 'Profit']]       # E.g. all orders having 2000 < Sales < 3000 and Profit > 100  ; # Also, this time, you only need the Cust_id, Sales and Profit columns
-
-beverage['beer_servings'] = beverage.beer_servings.astype(float)                    # to change type of column  .astype() 
-beverage = pd.read_csv(url, dtype={'beer_servings':float})                          # change data type of column while loading
-astype('category')
-
-Subsetting Data in pandas by Data Type
-****************************************************************
-beverage_Numeric = beverage.select_dtypes(include=['int64']).copy()                 # use df.select_dtypes to select the columns by data type
 
 customers_in_bangalore = ['Cust_1798', 'Cust_1519', 'Cust_637', 'Cust_851']
 df.loc[df['Cust_id'].isin(customers_in_bangalore), :]                             # syntax  df['column_name'].isin(list)
@@ -104,6 +125,24 @@ sales = market_df['Sales']                                                  #  f
 salesnew = market_df[['Sales','Discount']]                                             #  for seleting multiple column ; pass as an list
 market_df.set_index('Ord_id').head()                                        # making index as one of the colum field
 
+#Subsetting Data in pandas by Data Type
+#****************************************************************
+beverage['beer_servings'] = beverage.beer_servings.astype(float)                    # to change type of column  .astype() 
+beverage = pd.read_csv(url, dtype={'beer_servings':float})                          # change data type of column while loading
+beverage.beer_servings_type.astype('category')
+
+beverage_Numeric = beverage.select_dtypes(include=['int64']).copy()                 # use df.select_dtypes to select the columns by data type
+
+#Merge multiple dataframes using common columns/keys using pd.merge()  |   Concatenate (pile on top)(if column names r not  same) dataframes using pd.concat()
+************************************************************
+#Note that you can also use the pd.concat() method to merge dataframes using common keys, though here we will not discuss that. For simplicity, we have used the pd.merge() method for database-style merging and pd.concat() for appending dataframes having no common columns.
+#merge -  use generally if column names r same   |||| and   concat -  use generally if column names r not same
+
+
+pd.concat([df1, df2], axis = 0)  | df1.append(df2)                          # concat or append  azis =0  ie row wise stack
+pd.concat([df1, df2], axis = 1)                                             # used when different column names r there and we need to concat column side by side in  dataframe
+
+
 # Splitting data into groups |   Applying a function to each group (e.g. mean or total sales)  |  Combining the results into a data structure showing the summary statistics
 #*******************************************************************
 
@@ -113,10 +152,12 @@ df_3 = pd.merge(df_2, shipping_df, how='inner', on='Ship_id')
 
 m1 = pd.merge(btc, ether, how="inner", left_on="Date_btc", right_on="Date_et")
 
-df.groupby('Customer_Segment')
+df_by_segment = df.groupby('Customer_Segment')
 master_df['Customer_Segment'].unique()  | df_by_segment['Profit'].sum()
 df_by_segment['Profit'].sort_values(ascending = False)
+
 pd.DataFrame(df_by_segment['Profit'].sum())                                         # converting to dataframe
+
 df['Order_Date'] = pd.to_datetime(df['Order_Date'])                                 #converting object type to datetime format
 time_df = df.groupby('Order_Date')['Sales'].sum()                                   #groupby 
 df['month'] = df['Order_Date'].dt.month                                             # extract month from date part
@@ -125,35 +166,12 @@ by_product_cat_subcat = master_df.groupby(['Product_Category', 'Product_Sub_Cate
 by_product_cat_subcat['Profit'].mean()                                                          # then aplly mean
 master_df.groupby('Region').Profit.mean()                                                   # E.g. Customers in which geographic region are the least profitable?
 
-#Merge multiple dataframes using common columns/keys using pd.merge()  |   Concatenate (pile on top)(if column names r not  same) dataframes using pd.concat()
-#************************************************************
 
-#merge -  use generally if column names r same   |||| and   concat -  use generally if column names r not same
-
-pd.concat([df1, df2], axis = 0)  | df1.append(df2)                          # concat or append
-pd.concat([df1, df2], axis = 1)                                             # adding colum in concat dataframe
-
-# df.iloc and df.loc
-#********************************
-
-market_df.iloc[[3, 7, 8]]                                                       # Select multiple rows using a list of indices
-market_df.iloc[[True, True, False, True, True, False, True]]                    # Using booleans    # This selects the rows corresponding to True
-market_df.loc[4:8, :]
-market_df.loc['Ord_5406', ['Sales', 'Profit', 'Cust_id']]
-market_df.loc[['Ord_5406', 'Ord_5446', 'Ord_5485'], 'Sales':'Profit']               # Select multiple orders using labels, and some columns
-
-X = np.array([[1.1, 11.1], 
-              [2.2, 22.2], 
-              [3.3, 33.3], 
-              [4.4, 44.4], 
-              [np.nan, 55]])
-df = pd.DataFrame(X, columns=['Col1', 'Col2'])                                      #  load data as data frame
-
-
-
+#Managing Outliers
+#***********************************************************************
 df.dropna()                                                                         # Drop observations with missing values in data frame
 
-
+houses['Outlier'] = np.where(houses['Bathrooms'] < 20, 0, 1)                            # Create feature with value 0(for true) or 1(for false) based on boolean condition
 
 df = pd.DataFrame()                                                                 # Create an empty dataset
 
@@ -171,6 +189,47 @@ mean_imputer = mean_imputer.fit(df)
 imputed_df = mean_imputer.transform(df.values)  | imputer_df.fit_transform(X)
 
 
+Encoding Ordinal Categorical Features               ="http://contrib.scikit-learn.org/categorical-encoding/"
+***************************************************************
+mapper = {'Low':1, 'Medium':2,'High':3}                                     # Create mapper
+
+Employeedf['Satisfaction'] = Employeedf['Satisfaction'].replace(mapper)         # Map feature values to scale
+Employeedf.head()
+
+Encoding Nominal Categorical Features                  =" http://www.handsonmachinelearning.com/blog/McTKK/python-one-hot-encoding-with-scikit-learn"
+********************************************************************
+
+Employeedf = pd.get_dummies(Employeedf, columns=['Department'],drop_first=True)
+Employeedf = pd.get_dummies(Employeedf, columns=['Gender'],drop_first=True)
+
+
+min max strategy
+*********************************************************
+min_max_scaler = preprocessing.MinMaxScaler()                           # Create scale
+
+np_scaled = min_max_scaler.fit_transform(df)                           # Transform the feature
+
+df_normalized = pd.DataFrame(np_scaled,columns=('salary','score'))
+df_normalized
+
+standardization rescales
+******************************************************
+
+Standardization rescales data to have a mean (μ) of 0 and standard deviation (σ) of 1 (unit variance).
+
+scaler = preprocessing.StandardScaler()                                 # Create scaler
+
+standardized = scaler.fit_transform(df)                                 # Transform the feature
+
+df_standardized = pd.DataFrame(standardized,columns=('salary','score'))             # Show feature
+
+Binning
+*******************************************************
+
+bins = [20,30,40,70]
+labels = [1,2,3]
+df['binned_age'] = pd.cut(df['age'], bins=bins, labels=labels)
+print (df)
 
 
 
