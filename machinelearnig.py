@@ -4,6 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns                                                       # the commonly used alias for seaborn is sns
 
+from sklearn import preprocessing
+from sklearn.preprocessing import Imputer
+
 sns.set_style("whitegrid")                                                  # set a seaborn style of your taste
 
 #Numpy
@@ -83,6 +86,14 @@ df.loc(row,col)                                                                 
 df.loc[(df.Sales > 2000) & (df.Sales < 3000) & (df.Profit > 100), :]            # E.g. all orders having 2000 < Sales < 3000 and Profit > 100  ; # Also, this time, you need all the columns
 df.loc[(df.Sales > 2000) & (df.Sales < 3000) , ['Cust_id', 'Sales', 'Profit']]       # E.g. all orders having 2000 < Sales < 3000 and Profit > 100  ; # Also, this time, you only need the Cust_id, Sales and Profit columns
 
+beverage['beer_servings'] = beverage.beer_servings.astype(float)                    # to change type of column  .astype() 
+beverage = pd.read_csv(url, dtype={'beer_servings':float})                          # change data type of column while loading
+astype('category')
+
+Subsetting Data in pandas by Data Type
+****************************************************************
+beverage_Numeric = beverage.select_dtypes(include=['int64']).copy()                 # use df.select_dtypes to select the columns by data type
+
 customers_in_bangalore = ['Cust_1798', 'Cust_1519', 'Cust_637', 'Cust_851']
 df.loc[df['Cust_id'].isin(customers_in_bangalore), :]                             # syntax  df['column_name'].isin(list)
 
@@ -130,6 +141,37 @@ market_df.iloc[[True, True, False, True, True, False, True]]                    
 market_df.loc[4:8, :]
 market_df.loc['Ord_5406', ['Sales', 'Profit', 'Cust_id']]
 market_df.loc[['Ord_5406', 'Ord_5446', 'Ord_5485'], 'Sales':'Profit']               # Select multiple orders using labels, and some columns
+
+X = np.array([[1.1, 11.1], 
+              [2.2, 22.2], 
+              [3.3, 33.3], 
+              [4.4, 44.4], 
+              [np.nan, 55]])
+df = pd.DataFrame(X, columns=['Col1', 'Col2'])                                      #  load data as data frame
+
+
+
+df.dropna()                                                                         # Drop observations with missing values in data frame
+
+
+
+df = pd.DataFrame()                                                                 # Create an empty dataset
+
+
+df['x0'] = [0.3051,0.4949,0.6974,0.3769,0.2231,0.341,0.4436,0.5897,0.6308,0.5]
+df['x1'] = [np.nan,0.2654,0.2615,0.5846,0.4615,0.8308,0.4962,0.3269,0.5346,0.6731]      # Create two variables called x0 and x1. Make the first value of x1 a missing value
+# Create an imputer object that looks for 'Nan' values, then replaces them with the mean value of the feature by columns (axis=0)
+mean_imputer = Imputer(missing_values='NaN', strategy='mean', axis=0)
+imputer_df = Imputer(strategy='most_frequent', axis=0)
+
+# Train the imputor on the df dataset
+mean_imputer = mean_imputer.fit(df)
+
+# Apply the imputer to the df dataset
+imputed_df = mean_imputer.transform(df.values)  | imputer_df.fit_transform(X)
+
+
+
 
 
 #Matplot
@@ -249,12 +291,22 @@ sns.tsplot(df_time)                                                             
 
 year_month = pd.pivot_table(df, values='Sales', index='year', columns='month', aggfunc='mean')  #Pivoting the data using 'month'   index = rows,  mean of sales will be shown at 0,0  0,1  0,2 and so on 
 
+Managing missing values
+**********************************************
+X[np.isnan(X).any(axis=0)]                                                          # display the rows with nan as any one column value
 
 
 Doubts
 
 what is the significance of line on bar plot     "C:\Users\p7111567\ML\Session 5 - Pandas and Vizualizations\Basics of visualisation\3 Plotting Categorical and Time-Series Data\3_Plotting_Categorical_Data.ipynb
 "
+
+X = np.array([[1.1, 11.1], 
+              [2.2, 22.2], 
+              [3.3, 33.3], 
+              [4.4, 44.4], 
+              [np.nan, 55]])
+X[np.isnan(X).any(axis=0)]                                                          # display the rows with nan as any one column value
 
 
 
